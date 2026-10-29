@@ -19,7 +19,6 @@ def test_calculate_live_zscore(mock_download):
     """Validates Z-score calculation with mocked historical price data."""
     dates = pd.date_range(start='2025-01-01', periods=100, freq='B')
     
-    # Create yfinance-style MultiIndex columns ('Close', 'AAPL') and ('Close', 'MSFT')
     columns = pd.MultiIndex.from_tuples([
         ('Close', 'AAPL'),
         ('Close', 'MSFT')
@@ -51,11 +50,14 @@ def test_assess_pair_rejection(mock_download):
         ('Close', 'MSFT')
     ], names=['Price', 'Ticker'])
     
+    # Create a sharp divergence near the end so abs(zscore) >= 2.0
+    aapl_prices = np.ones(100) * 100.0
+    aapl_prices[-10:] = np.linspace(100, 180, 10)  # Sharp spike
+    
+    msft_prices = np.ones(100) * 200.0
+    
     mock_multi_df = pd.DataFrame(
-        np.column_stack([
-            np.linspace(100, 110, 100),
-            np.linspace(200, 280, 100)
-        ]),
+        np.column_stack([aapl_prices, msft_prices]),
         index=dates,
         columns=columns
     )
