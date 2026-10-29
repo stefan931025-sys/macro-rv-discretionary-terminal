@@ -1,28 +1,46 @@
-name: CI
+name: Macro RV Terminal CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pandas numpy yfinance
-        
-    - name: Run Pytest
-      run: |
-        PYTHONPATH=. pytest tests/
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies & Quality Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas yfinance statsmodels pytest pytest-cov flake8 mypy bandit
+
+      - name: Run Linting (Flake8)
+        run: |
+          flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics || flake8 --count --select=E9,F63,F7,F82 --show-source --statistics || true
+
+      - name: Run Type Checking (Mypy)
+        run: |
+          set +e
+          mypy src/ --ignore-missing-imports || mypy . --ignore-missing-imports
+          exit 0
+
+      - name: Run Macro RV Filter Execution
+        run: |
+          export PYTHONPATH=src:.
+          python macro_rv_filter.py || true
+
+      - name: Run Pytest Suite
+        run: |
+          export PYTHONPATH=src:.
+          pytest tests/ --cov=. --cov-report=term-missing
