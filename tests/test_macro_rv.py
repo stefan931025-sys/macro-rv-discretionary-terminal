@@ -18,10 +18,21 @@ def test_initialization():
 def test_calculate_live_zscore(mock_download):
     """Validates Z-score calculation with mocked historical price data."""
     dates = pd.date_range(start='2025-01-01', periods=100, freq='B')
-    mock_multi_df = pd.DataFrame({
-        'AAPL': np.linspace(100, 150, 100),
-        'MSFT': np.linspace(200, 250, 100)
-    }, index=dates)
+    
+    # Create yfinance-style MultiIndex columns ('Close', 'AAPL') and ('Close', 'MSFT')
+    columns = pd.MultiIndex.from_tuples([
+        ('Close', 'AAPL'),
+        ('Close', 'MSFT')
+    ], names=['Price', 'Ticker'])
+    
+    mock_multi_df = pd.DataFrame(
+        np.column_stack([
+            np.linspace(100, 150, 100),
+            np.linspace(200, 250, 100)
+        ]),
+        index=dates,
+        columns=columns
+    )
     mock_download.return_value = mock_multi_df
 
     filter_obj = MacroRelativeValueFilter("AAPL", "MSFT")
@@ -34,10 +45,20 @@ def test_calculate_live_zscore(mock_download):
 def test_assess_pair_rejection(mock_download):
     """Validates that earnings risk and structural breaks trigger proper rejections."""
     dates = pd.date_range(start='2025-01-01', periods=100, freq='B')
-    mock_multi_df = pd.DataFrame({
-        'AAPL': np.linspace(100, 110, 100),
-        'MSFT': np.linspace(200, 280, 100)
-    }, index=dates)
+    
+    columns = pd.MultiIndex.from_tuples([
+        ('Close', 'AAPL'),
+        ('Close', 'MSFT')
+    ], names=['Price', 'Ticker'])
+    
+    mock_multi_df = pd.DataFrame(
+        np.column_stack([
+            np.linspace(100, 110, 100),
+            np.linspace(200, 280, 100)
+        ]),
+        index=dates,
+        columns=columns
+    )
     mock_download.return_value = mock_multi_df
 
     filter_obj = MacroRelativeValueFilter("AAPL", "MSFT")
