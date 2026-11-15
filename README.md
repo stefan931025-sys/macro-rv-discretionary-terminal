@@ -1,42 +1,48 @@
-# Macro Relative Value Discretionary Terminal
+# Multi-Asset Portfolio VaR & Risk Attribution Suite
 
-![CI Workflow](https://github.com/stefan931025-sys/macro-rv-discretionary-terminal/actions/workflows/ci.yml/badge.svg)
+![CI Workflow](https://github.com/stefan931025-sys/Multi-Asset-Portfolio-VaR-Stress-Testing-Suite/actions/workflows/ci.yml/badge.svg)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-A discretionary relative value desk decision-support terminal evaluating quantitative statistical arbitrage $Z$-score pair divergences against macro catalysts, fundamental earnings risk, and structural regime shifts[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span).
+An institutional risk management tool for computing Value-at-Risk (VaR) and conducting tail-risk stress testing across multi-asset portfolios (Equities, FX, and Fixed Income).
 
-## 🚀 Core Strategy & Architecture
+## 🚀 Key Features
 
-1. **Statistical Screener:** Monitors cointegration residuals and flags $Z$-score spread divergences ($\vert{}Z\vert{} \geq 2.0$)[span_2](start_span)[span_2](end_span).
-2. **Fundamental & Macro Overlay:** Filters execution signals through binary event calendars (imminent earnings, regulatory actions) and macro factor tailwind alignment[span_3](start_span)[span_3](end_span).
-3. **Execution Decision Engine:** Converts raw mean-reversion signals into actionable risk allocations (Full Position, Half Position, or Rejection due to structural break risk)[span_4](start_span)[span_4](end_span).
+* **Dual VaR Calculation Methodologies:** Implements both Parametric (Variance-Covariance) and Monte Carlo simulation engines (10,000+ trials).
+* **Cross-Asset Correlation Modeling:** Accounts for cross-asset correlations across equity, currency, and fixed income instruments.
+* **Confidence Level Scaling:** Computes customized 95% and 99% VaR metrics across 1-day to multi-day horizons.
+* **Tail-Risk Stress Testing:** Simulates historical and hypothetical macro stress scenarios to measure portfolio vulnerability.
 
 ---
 
 ## 📊 Mathematical Specifications
 
-### 1. Macro-Adjusted Spread Divergence
+### 1. Parametric Portfolio VaR
 
-$$Z_t^{\text{macro}} = \frac{(Y_t - \beta X_t) - \mu}{\sigma_t} \cdot w_{\text{macro}}$$
+$$\text{VaR}_{\alpha} = z_{\alpha} \cdot \sigma_p \cdot \sqrt{t}$$
 
-Where $w_{\text{macro}}$ penalizes positioning when macro factor volatility or earnings event risk is elevated[span_5](start_span)[span_5](end_span).
+Where $\sigma_p = \sqrt{w^T \Sigma w}$ is the portfolio volatility derived from asset weights vector $w$ and covariance matrix $\Sigma$.
+
+### 2. Monte Carlo Simulation Engine
+
+Simulating asset price paths via Geometric Brownian Motion (GBM) with Cholesky decomposition of the correlation matrix:
+
+$$S_t = S_{t-1} \exp\left((\mu - \frac{\sigma^2}{2})\Delta t + \sigma\sqrt{\Delta t}Z\right)$$
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-macro-rv-discretionary-terminal/
-├── .devcontainer/     # Devcontainer configuration for Codespaces
+Multi-Asset-Portfolio-VaR-Stress-Testing-Suite/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml     # GitHub Actions automated test workflow
+│       └── ci.yml             # GitHub Actions automated test workflow
 ├── core/
-│   └── rv_filter.py   # Macro-conditioned RV & spread filter modules
+│   └── risk_engine.py         # Parametric & Monte Carlo VaR engine
 ├── tests/
-│   └── test_macro_rv.py # Automated pytest suite
-├── main.py            # Main execution pipeline script
-├── repo_auditor.py    # Static AST analysis governance tool
-├── requirements.txt   # Python dependencies
-└── README.md          # System documentation
+│   └── test_risk_engine.py    # Automated pytest suite
+├── main.py                    # Main execution script
+├── repo_auditor.py            # Static AST analysis governance tool
+├── requirements.txt           # Python dependencies
+└── README.md                  # System documentation
